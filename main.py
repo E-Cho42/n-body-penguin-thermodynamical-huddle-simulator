@@ -6,16 +6,6 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.widgets import Slider
 import matplotlib.gridspec as gridspec
 
-def hex_grid(n, spacing=2.0):
-    candidates = []
-    grid_side = int(np.ceil(np.sqrt(n))) + 4
-    for row in range(-grid_side, grid_side + 1):
-        for col in range(-grid_side, grid_side + 1):
-            x = col * spacing + (row % 2) * spacing * 0.5
-            y = row * spacing * (np.sqrt(3) / 2)
-            candidates.append([x, y])
-    candidates.sort(key=lambda pos: pos[0]**2 + pos[1]**2)
-    return candidates[:n]
 
 def main():
     N_PENGUINS = 75
@@ -23,14 +13,13 @@ def main():
     "HEAT_LOSS": 0.01, 
     "HEAT_GAIN": 0.02, 
     "SENSITIVITY": 0.05, 
-    "SEPARATION_FORCE": 0.08, # Add this
-    "SEPARATION_DIST": 1.2,    # Add this
-    "MAX_SPEED": 0.15,        # Add this
+    "SEPARATION_FORCE": 0.08, 
+    "SEPARATION_DIST": .5,    
+    "MAX_SPEED": 0.15,        
     "DAMPING": 0.8
-}
-
+    }
     positions = hex_grid(N_PENGUINS)
-    penguins = [p.Penguin(heat=np.random.uniform(0.3, 1.0), location=positions[i], velocity=[0, 0]) for i in range(N_PENGUINS)]
+    penguins = [p.Penguin(t = 0 ,heat=np.random.uniform(0.3, 1.0), location=positions[i], velocity=[0, 0]) for i in range(N_PENGUINS)]
 
     fig = plt.figure(figsize=(15, 7), facecolor="#2b4b77")
 
@@ -64,19 +53,12 @@ def main():
     line, = ax_graph.plot([], [], color="#ffcc00", linewidth=1.5)
     temp_history = []
 
-
-
-    # Get the bounding box of the bottom-right cell to position sliders inside it
-    # We'll use figure-fraction coordinates manually aligned to gs_right[1]
-    # Left edge of the right column starts around x=0.68 in a 15"-wide figure with width_ratios [2,1]
     slider_left   = 0.685
     slider_width  = 0.27
     slider_height = 0.025
     slider_keys   = list(config.keys())
     n_sliders     = len(slider_keys)
-
-    # Distribute sliders evenly inside the bottom half of the figure
-    bottom_top    = 0.44   # top of the bottom-right panel (approx)
+    bottom_top    = 0.44   
     bottom_bottom = 0.05
     panel_height  = bottom_top - bottom_bottom
     gap = panel_height / (n_sliders + 1)
@@ -99,17 +81,23 @@ def main():
 
         sl.on_changed(make_updater(key))
         sliders[key] = sl
-
+    
     def update(frame):
+        # run functions
         heat_transfer(penguins, config)
         applyforce(penguins, config)
+        
+        #move penguins
+        
         for pg in penguins:
+            pg.t += 1/60
             pg.location[0] += pg.velocity[0]
             pg.location[1] += pg.velocity[1]
 
         scat.set_offsets([[pg.location[0], pg.location[1]] for pg in penguins])
         scat.set_array(np.array([pg.heat for pg in penguins]))
 
+        #graph stuff 
         avg_heat = np.mean([pg.heat for pg in penguins])
         temp_history.append(avg_heat)
         if len(temp_history) > 200:
@@ -120,8 +108,10 @@ def main():
         ax_graph.set_ylim(0, 1)
         return scat, line
 
-    ani = FuncAnimation(fig, update, interval=40, blit=False, cache_frame_data=False)
+    ani = FuncAnimation(fig, update, interval=60, blit=False, cache_frame_data=False)
+    plt.title(label= "n body penguin thermodynamical huddle simulator")
     plt.show()
+    
     return 0
 
 main()

@@ -1,0 +1,55 @@
+readme_content = """# Agent-Based Thermal Dynamics and Particle Interaction Model
+
+This repository contains a multi-agent simulation framework designed to model thermodynamic heat transfer and kinetic particle dynamics. The system employs a force-directed approach to manage agent behavior, proximity repulsion, and thermal equilibrium across a distributed grid of agents.
+
+## Project Overview
+
+The simulation models a system where individual agents maintain thermal states that interact with their immediate neighbors. Agents exhibit collective behavior derived from individual rules, including:
+
+* Thermodynamic Flux: Agents experience heat loss over time, balanced by thermal gain derived from proximity to neighbors.
+* Kinetic Motion: Movement is governed by a combination of directional vectors (toward a central target), stochastic Brownian motion (jitter), and distance-based repulsion forces to prevent particle overlap.
+* System Constraints: The model implements damping and velocity capping to ensure stability within the simulation environment.
+
+## Technical Implementation
+
+The codebase is modularized into three primary components:
+
+* main.py: Serves as the application controller. It manages the simulation lifecycle, the matplotlib animation loop, and the graphical interface for real-time hyperparameter adjustment.
+* functions.py: Contains the core physics engine, including vector calculations for collision avoidance, thermodynamic update functions, and the initialization of the agent grid using a hexagonal tessellation algorithm.
+* penguin.py: Defines the base Agent class, encapsulating individual states: thermal levels, current velocity, and spatial coordinates.
+
+## Installation and Requirements
+
+The simulation requires Python 3.x and the following libraries:
+
+pip install numpy matplotlib
+
+## Execution
+
+To initialize the simulation with default parameters, run the following command from the project root directory:
+
+python main.py
+
+## Simulation Parameters
+
+The system utilizes an interactive control panel to adjust simulation variables in real-time. These parameters govern the behavior of the agent population:
+
+| Parameter | Function |
+| :--- | :--- |
+| HEAT_LOSS | Constant rate of thermal dissipation per time step. |
+| HEAT_GAIN | Thermal absorption rate from localized neighborhood density. |
+| SENSITIVITY | Responsiveness coefficient for thermal-based behavioral shifts. |
+| SEPARATION_FORCE | Magnitude of the repulsive force to prevent particle collision. |
+| SEPARATION_DIST | Radius of influence for proximity-based interactions. |
+| MAX_SPEED | Scalar limit applied to velocity vectors. |
+| DAMPING | Friction coefficient applied to normalize kinetic energy. |
+
+## Methodology Highlights
+
+* Grid Initialization: Agents are initialized using a hexagonal packing strategy to ensure uniform density distribution at t=0.
+* Force-Directed Dynamics: Separation logic utilizes an inverse-square relationship relative to distance, mimicking fluid particle interaction.
+* Dynamic Visuals: The UI integrates matplotlib widgets to allow for dynamic modification of simulation constants, enabling the observation of system convergence or divergence based on variable input.
+"""
+
+with open("README.txt", "w") as f:
+    f.write(readme_content)
