@@ -24,28 +24,35 @@ def heat_transfer(penguins, config):
         pg.heat = max(0.0, min(1.0, pg.heat))
 
 def applyforce(penguins, config):
+    
+    # Extract target from config
+    #target = np.array([config.get('TARGET_X', 0.0), config.get('TARGET_Y', 0.0)])
+    
+    target = [0,0]
+    
     for pg in penguins:
-        # --- 1. Movement Logic (Target-based) ---
-        # We calculate the direction to the center (0,0)
-        target = np.array([0.0, 0.0])
+        # --- 1. Movement Logic (Steering Toward Target) ---
         pos = np.array(pg.location)
         diff = target - pos
-        dist_to_center = np.linalg.norm(diff)
+        dist_to_target = np.linalg.norm(diff)
         
-        if dist_to_center > 0.1:
-            # Normalize the direction vector
-            direction_unit = diff / dist_to_center
-            
-            if pg.heat < 0.3:
-                # Cold penguins: head inward
-                pg.velocity[0] += direction_unit[0] * 0.1 
-                pg.velocity[1] += direction_unit[1] * 0.1 
-            elif pg.heat > 0.99:
-                # Hot penguins: head outward 
-                pg.velocity[0] -= direction_unit[0] * 0.08 + pg.dircetion * .05
-                pg.velocity[1] -= direction_unit[1] * 0.08 -.05
+        if dist_to_target > 0.1:
+            direction = diff / dist_to_target
+            pull_strength = 0.08 if pg.heat < 0.3 else 0.04
+            pg.velocity += direction * pull_strength
+            if pg.heat >= .8:
+                if pg.dircetion == -1:
+                    pg.velocity += [-.01,.04]
+                else:
+                    pg.velocity += [.01,.04]
+            elif pg.heat < .4:
+                if pg.dircetion == -1:
+                    pg.velocity += [-.03,.0]
+                else:
+                    pg.velocity += [.03,.0]
+                
 
-        # --- 2. Separation Logic (Fluid Inverse-Square) 
+        # --- 2. Separation Logic (Fluid Inverse-Square) ---
         for other in penguins:
             if pg == other: continue
             
@@ -53,16 +60,14 @@ def applyforce(penguins, config):
             dy = pg.location[1] - other.location[1]
             dist_sq = dx**2 + dy**2
             
-            # Using squared distance for the check is faster
             if dist_sq < config['SEPARATION_DIST']**2 and dist_sq > 0.01:
                 dist = np.sqrt(dist_sq)
-                # Force gets much stronger as they get closer
                 push = config['SEPARATION_FORCE'] / dist
                 pg.velocity[0] += (dx / dist) * push
                 pg.velocity[1] += (dy / dist) * push
 
         # --- 3. Jitter (Brownian Motion) ---
-        jitter = 0.05
+        jitter = 0.001
         pg.velocity[0] += np.random.uniform(-jitter, jitter)
         pg.velocity[1] += np.random.uniform(-jitter, jitter)
 
@@ -70,12 +75,10 @@ def applyforce(penguins, config):
         pg.velocity[0] *= config['DAMPING']
         pg.velocity[1] *= config['DAMPING']
 
-        speed = np.sqrt(pg.velocity[0]**2 + pg.velocity[1]**2)
+        speed = np.linalg.norm(pg.velocity)
         if speed > config['MAX_SPEED']:
-            pg.velocity[0] *= (config['MAX_SPEED'] / speed)
-            pg.velocity[1] *= (config['MAX_SPEED'] / speed)
-            
-            
+            pg.velocity = (pg.velocity / speed) * config['MAX_SPEED']
+                        
 def hex_grid(n, spacing=2.0):
     candidates = []
     grid_side = int(np.ceil(np.sqrt(n))) + 4
@@ -86,3 +89,4 @@ def hex_grid(n, spacing=2.0):
             candidates.append([x, y])
     candidates.sort(key=lambda pos: pos[0]**2 + pos[1]**2)
     return candidates[:n]
+
