@@ -17,7 +17,7 @@ def main():
         "MAX_SPEED": 0.15,        
         "DAMPING": 0.363,
         "TARGET_X": 0.0,
-        "TARGET_Y": 0.0
+        "TARGET_Y": 0.0,
     }
     
     positions = hex_grid(N_PENGUINS)
@@ -29,7 +29,7 @@ def main():
     # --- LEFT: Simulation ---
     ax_sim = fig.add_subplot(gs_main[0, 0])
     ax_sim.set_facecolor("#1b375c")
-    ax_sim.set_title("Penguin Simulator (Click to move huddle)", color="white", fontsize=14)
+    ax_sim.set_title("Penguin Simulator", color="white", fontsize=14)
     ax_sim.set_xlim(-10, 10); ax_sim.set_ylim(-10, 10); ax_sim.set_aspect("equal")
     ax_sim.tick_params(colors="white")
     scat = ax_sim.scatter([pg.location[0] for pg in penguins], [pg.location[1] for pg in penguins], 

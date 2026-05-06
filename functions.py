@@ -9,23 +9,19 @@ def heat_transfer(penguins, config):
             if i == j: continue
             dx = pg.location[0] - other.location[0]
             dy = pg.location[1] - other.location[1]
-            if np.sqrt(dx**2 + dy**2) < 1.0: # CLOSE_DIST
+            if np.sqrt(dx**2 + dy**2) < 1.0:
                 neighbours += 1
-        
 
         dist_to_centre = np.sqrt(pg.location[0]**2 + pg.location[1]**2)
         boundary_penalty = 0.002 * dist_to_centre
 
-        # Using config dictionary
-        if neighbours == 0:
-            pg.heat += config['HEAT_GAIN'] * neighbours - config['HEAT_LOSS'] - boundary_penalty
-        else: 
-            pg.heat += config['HEAT_GAIN'] * neighbours - config['HEAT_LOSS'] - boundary_penalty
+        pg.heat += config['HEAT_GAIN'] * neighbours - config['HEAT_LOSS'] - boundary_penalty
         pg.heat = max(0.0, min(1.0, pg.heat))
 
 def applyforce(penguins, config):
     
-    # Extract target from config
+    
+    #target if user want to be ale to direct the penguins 
     #target = np.array([config.get('TARGET_X', 0.0), config.get('TARGET_Y', 0.0)])
     
     target = [0,0]
@@ -89,4 +85,5 @@ def hex_grid(n, spacing=2.0):
             candidates.append([x, y])
     candidates.sort(key=lambda pos: pos[0]**2 + pos[1]**2)
     return candidates[:n]
+
 
